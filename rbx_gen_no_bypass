@@ -1,0 +1,67 @@
+import tkinter as tk
+import tkinter.font as tkFont
+import requests
+
+class App:
+    def __init__(x):
+        x.window = tk.Tk()
+        x.window.title("Roblox Signup")
+        x.window.geometry("600x600")
+        x.window.configure(bg="#008CBA") 
+
+        x.welcome_label = tk.Label(x.window, text="Welcome to Roblox Signup", font=("Arial", 16, "bold"), fg="#FFFFFF", bg="#008CBA", pady=20)
+        x.welcome_label.pack()
+
+        x.username_label = tk.Label(x.window, text="Username:", font=("Arial", 14), fg="#FFFFFF", bg="#008CBA", padx=20, pady=10)
+        x.username_label.pack()
+        x.username_entry = tk.Entry(x.window, font=("Arial", 14))
+        x.username_entry.pack()
+
+        x.password_label = tk.Label(x.window, text="Password:", font=("Arial", 14), fg="#FFFFFF", bg="#008CBA", padx=20, pady=10)
+        x.password_label.pack()
+        x.password_entry = tk.Entry(x.window, font=("Arial", 14), show="*")
+        x.password_entry.pack()
+
+        x.confirm_password_label = tk.Label(x.window, text="Confirm Password:", font=("Arial", 14), fg="#FFFFFF", bg="#008CBA", padx=20, pady=10)
+        x.confirm_password_label.pack()
+        x.confirm_password_entry = tk.Entry(x.window, font=("Arial", 14), show="*")
+        x.confirm_password_entry.pack()
+
+        x.birthday_label = tk.Label(x.window, text="Birthday:", font=("Arial", 14), fg="#FFFFFF", bg="#008CBA", padx=20, pady=10)
+        x.birthday_label.pack()
+        x.birthday_entry = tk.Entry(x.window, font=("Arial", 14))
+        x.birthday_entry.pack()
+
+        x.gender_label = tk.Label(x.window, text="Gender:", font=("Arial", 14), fg="#FFFFFF", bg="#008CBA", padx=20, pady=10)
+        x.gender_label.pack()
+        x.gender_entry = tk.Entry(x.window, font=("Arial", 14))
+        x.gender_entry.pack()
+
+        x.signup_button = tk.Button(x.window, text="Sign up", font=("Arial", 14), bg="#4CAF50", fg="#FFFFFF", command=x.signup)
+        x.signup_button.pack(pady=20)
+
+        x.result_label = tk.Label(x.window, text="", font=("Arial", 14), fg="#FFFFFF", bg="#008CBA")
+        x.result_label.pack()
+
+        x.window.mainloop()
+
+    def signup(x):
+        username = x.username_entry.get()
+        password = x.password_entry.get()
+        confirm_password = x.confirm_password_entry.get()
+        birthday = x.birthday_entry.get()
+        gender = x.gender_entry.get()
+        data = {
+            'username': username,
+            'password': password,
+            'confirmPassword': confirm_password,
+            'birthday': birthday,
+            'gender': gender
+        }
+        x.result_label.configure(text="Signing up...")
+        r = requests.post('https://www.roblox.com/signup', data=data)
+        if 'Thank you for signing up!' in r.text:
+            x.result_label.configure(text=f"Successfully signed up as {username}", bg="#4CAF50")
+        else:
+            x.result_label
+app = App()
