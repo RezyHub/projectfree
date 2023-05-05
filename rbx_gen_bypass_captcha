@@ -1,0 +1,107 @@
+import tkinter as tk
+import tkinter.font as tkFont
+import requests
+import random
+
+class RobloxAccountCreator:
+    def __init__(self):
+        self.session = requests.Session()
+        self.session.headers.update({
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'})
+
+    def generate_username(self, name_type):
+        if name_type == 'sequential':
+            username = 'user' + str(random.randint(100000, 999999))
+        elif name_type == 'random':
+            username = 'user' + str(random.randint(100000000, 999999999))
+        elif name_type == '5char':
+            username = ''.join(random.choice('abcdefghijklmnopqrstuvwxyz') for i in range(5))
+        return username
+
+    def create_account(self, name_type):
+        while True:
+            username = self.generate_username(name_type)
+            r = self.session.get('https://www.roblox.com/search/users/user?keyword=' + username)
+            if 'No users found with this keyword.' in r.text:
+                break
+
+        r = self.session.get('https://www.roblox.com/signup')
+        viewstate = r.text.split('name="__VIEWSTATE" value="')[1].split('"')[0]
+        viewstategenerator = r.text.split('name="__VIEWSTATEGENERATOR" value="')[1].split('"')[0]
+        captchakey = r.text.split('data-sitekey="')[1].split('"')[0]
+
+        captcha_response = self.session.post('https://2captcha.com/in.php?key=APIKEYใส่ตรงนี้&method=userrecaptcha&googlekey=' + captchakey + '&pageurl=https://www.roblox.com/signup', headers={
+            'User-Agent': self.session.headers['User-Agent']
+        }).text.split('|')[1]
+        while True:
+            captcha_result = self.session.get('https://2captcha.com/res.php?key=APIKEYใส่ตรงนี้&action=get&id=' + captcha_response, headers={
+                'User-Agent': self.session.headers['User-Agent']
+            }).text
+            if captcha_result == 'CAPCHA_NOT_READY':
+                continue
+            captcha_response = captcha_result.split('|')[1]
+            break
+
+        data = {
+            '__EVENTTARGET': '',
+            '__EVENTARGUMENT': '',
+            '__VIEWSTATE': viewstate,
+            '__VIEWSTATEGENERATOR': viewstategenerator,
+            'ctl00$cphRoblox$SignUpWizard$txtUserName': username,
+            'ctl00$cphRoblox$SignUpWizard$txtPassword': 'Password123',
+            'ctl00$cphRoblox$SignUpWizard$txtConfirmPassword': 'Password123',
+            'ctl00$cphRoblox$SignUpWizard$GenderSelectorView$GenderDropDownList': '1',
+            'ctl00$cphRoblox$SignUpWizard$txtBirthday': '01/01/1995',
+            'ctl00$cphRoblox$SignUpWizard$txtCaptcha': captcha_response,
+            'ctl00$cphRoblox$SignUpWizard$StepNextButton': 'Create'
+        }
+
+        r = self.session.post('https://www.roblox.com/signup', data=data)
+        if 'Thank you for signing up!' in r.text:
+            return username
+        else:
+            return None
+
+
+
+class App:
+    def __init__(self):
+        self.window = tk.Tk()
+        self.window.title("Roblox Signup")
+        self.window.geometry("400x300")
+        self.window.configure(bg="#008CBA") 
+
+        self.welcome_label = tk.Label(self.window, text="Welcome to Roblox Signup", font=("Arial", 16, "bold"), fg="#FFFFFF", bg="#008CBA", pady=20)
+        self.welcome_label.pack()
+
+        self.username_label = tk.Label(self.window, text="Username:", font=("Arial", 14), fg="#FFFFFF", bg="#008CBA", padx=20, pady=10)
+        self.username_label.pack()
+        self.username_entry = tk.Entry(self.window, font=("Arial", 14))
+        self.username_entry.pack()
+
+        self.signup_button = tk.Button(self.window, text="Sign up", font=("Arial", 14), bg="#4CAF50", fg="#FFFFFF", command=self.signup)
+        self.signup_button.pack(pady=20)
+
+        self.result_label = tk.Label(self.window, text="", font=("Arial", 14), fg="#FFFFFF", bg="#008CBA")
+        self.result_label.pack()
+
+        self.window.mainloop()
+
+    def signup(self):
+        username = self.username_entry.get()
+        data = {
+            'username': username,
+            'password': 'robloxhagger111',
+            'confirmPassword': 'robloxhagger111',
+            'birthday': '1/1/2000',
+            'gender': '2'
+        }
+        self.result_label.configure(text="Signing up...")
+        r = requests.post('https://www.roblox.com/signup', data=data)
+        if 'Thank you for signing up!' in r.text:
+            self.result_label.configure(text=f"Successfully signed up as {username}", bg="#4CAF50")
+        else:
+            self.result_label.configure(text="Failed to sign up", bg="#FF5722")
+
+app = App()
+--โค้ตนี้สร้างโดย https://www.facebook.com/profile.php?id=100064330488845
